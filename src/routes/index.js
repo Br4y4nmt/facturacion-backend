@@ -1,8 +1,16 @@
 import express from "express";
-const router = express.Router();
-import clientesRoutes from "#domains/clientes/routes.js";
+import clientesRouter from "#domains/clientes/routes.js";
+import empresaRouter from "#domains/empresa/routes.js";
+import rolRouter from "#domains/rol/routes.js";
+import usuariosRouter from "#domains/usuarios/routes.js";
+import { authenticate } from "#middlewares/auth.js";
 
-// Usa las rutas bajo un prefijo
-router.use("/clientes", clientesRoutes);
+const router = express.Router();
+
+router.use("/clientes", authenticate, clientesRouter);
+router.use("/empresas", authenticate, empresaRouter);
+router.use("/roles", authenticate, rolRouter);
+router.use("/usuarios", authenticate, usuariosRouter);
+
 
 export default router;
