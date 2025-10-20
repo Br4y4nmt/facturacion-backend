@@ -1,5 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import Rol from "#domains/rol/model.js";
+import Permiso from "#domains/permiso/model.js";
 import * as repo from "./repository.js";
 
 const signAccessToken = (payload) =>
@@ -9,6 +11,10 @@ const signRefreshToken = (payload) =>
   jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d" });
 
 
+
+export const listarUsuarios = async (empresaId) => {
+  return await repo.findAll(empresaId);
+};
 
 
 // REGISTRO
@@ -38,32 +44,40 @@ export const login = async ({ email, password }) => {
   const usuario = await repo.findByEmail(email);
   if (!usuario) throw new Error("Usuario no encontrado");
 
-  const ok = await bcrypt.compare(password, usuario.password);
-  if (!ok) throw new Error("Credenciales inválidas");
+  const esValido = await bcrypt.compare(password, usuario.password);
+  if (!esValido) throw new Error("Credenciales inválidas");
 
-  const payload = {
-    id: usuario.id,
-    email: usuario.email,
-    rolId: usuario.rolId,
-    empresaId: usuario.empresaId,
-  };
+  // 🔥 Obtener permisos dinámicos del rol
+  const rol = await Rol.findByPk(usuario.rolId, {
+    include: [{ model: Permiso }],
+  });
 
-  const accessToken = signAccessToken(payload);
-  const refreshToken = signRefreshToken(payload); 
+  const permisos = rol.Permisos.map((p) => p.nombre);
+
+  // Generar token JWT con permisos incluidos
+  const token = jwt.sign(
+    {
+      id: usuario.id,
+      email: usuario.email,
+      rolId: usuario.rolId,
+      empresaId: usuario.empresaId,
+      permissions: permisos,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "8h" }
+  );
 
   return {
-    accessToken,
-    refreshToken, 
     usuario: {
       id: usuario.id,
       nombre: usuario.nombre,
       email: usuario.email,
       rolId: usuario.rolId,
-      empresaId: usuario.empresaId,
+      permisos,
     },
+    token,
   };
 };
-
 
 
 // REFRESH (opcional)

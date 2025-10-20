@@ -1,10 +1,15 @@
-export const authorizeRoles = (...allowed) => {
+export const authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!req.user?.rolId) return res.status(403).json({ error: "Sin rol" });
+    const userRole = req.user?.rolId;
 
-    if (!allowed.includes(req.user.rolId)) {
-      return res.status(403).json({ error: "No autorizado" });
+    if (!userRole) {
+      return res.status(403).json({ error: "No se encontró el rol del usuario" });
     }
-    next();
+
+    if (!allowedRoles.includes(userRole)) {
+      return res.status(403).json({ error: "No tienes permiso para acceder a esta ruta" });
+    }
+
+    next(); 
   };
 };
