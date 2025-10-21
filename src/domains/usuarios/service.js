@@ -47,14 +47,11 @@ export const login = async ({ email, password }) => {
   const esValido = await bcrypt.compare(password, usuario.password);
   if (!esValido) throw new Error("Credenciales inválidas");
 
-  // 🔥 Obtener permisos dinámicos del rol
   const rol = await Rol.findByPk(usuario.rolId, {
     include: [{ model: Permiso }],
   });
-
   const permisos = rol.Permisos.map((p) => p.nombre);
-
-  // Generar token JWT con permisos incluidos
+  
   const token = jwt.sign(
     {
       id: usuario.id,

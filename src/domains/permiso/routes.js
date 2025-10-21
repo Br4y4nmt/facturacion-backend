@@ -5,7 +5,6 @@ import { authorizeAdvanced } from "#middlewares/permissions.js";
 
 const router = express.Router();
 
-// Solo SuperAdmin (rolId = 1) puede gestionar permisos
 router.get("/", authenticate, authorizeAdvanced([1], ["ver_permisos"]), getPermisos);
 router.post("/", authenticate, authorizeAdvanced([1], ["crear_permisos"]), postPermiso);
 router.delete("/:id", authenticate, authorizeAdvanced([1], ["eliminar_permisos"]), deletePermiso);
