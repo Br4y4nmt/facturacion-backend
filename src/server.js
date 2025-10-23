@@ -4,13 +4,14 @@ import helmet from "helmet";
 import hpp from "hpp";
 import rateLimit from "express-rate-limit";
 import router from "./routes/index.js";
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";     
+dotenv.config();     
 
 const app = express();
 
-// 🛡️ Seguridad HTTP
-app.use(helmet()); // Protege cabeceras HTTP
-app.use(hpp()); // Previene parámetros duplicados
-
+app.use(helmet()); 
+app.use(hpp());
 
 app.use(
   cors({
@@ -18,7 +19,6 @@ app.use(
     credentials: true,
   })
 );
-
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
@@ -29,6 +29,7 @@ app.use(limiter);
 
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api", router);
 
