@@ -5,19 +5,14 @@ import Rol from "#domains/rol/model.js";
 import Permiso from "#domains/permiso/model.js";
 import Empresa from "#domains/empresa/model.js";
 
-/**
- * 🔐 Inicia sesión, valida credenciales y genera token JWT
- */
+
 export const login = async ({ email, password }) => {
-  // 1️⃣ Buscar usuario
   const usuario = await Usuario.findOne({ where: { email } });
   if (!usuario) throw new Error("Usuario no encontrado");
 
-  // 2️⃣ Verificar contraseña
   const esValido = await bcrypt.compare(password, usuario.password);
   if (!esValido) throw new Error("Credenciales inválidas");
 
-  // 3️⃣ Obtener rol y permisos
   const rol = await Rol.findByPk(usuario.rolId, {
     include: [{ model: Permiso }],
   });
@@ -25,7 +20,6 @@ export const login = async ({ email, password }) => {
 
   const permisos = rol.Permisos.map((p) => p.nombre);
 
-  // 4️⃣ Obtener empresa (opcional)
   let empresa = null;
   if (usuario.empresaId) {
     const empresaData = await Empresa.findByPk(usuario.empresaId, {
@@ -34,7 +28,6 @@ export const login = async ({ email, password }) => {
     empresa = empresaData ? empresaData.razonSocial : null;
   }
 
-  // 5️⃣ Generar token JWT
   const payload = {
     id: usuario.id,
     email: usuario.email,
@@ -48,7 +41,6 @@ export const login = async ({ email, password }) => {
     expiresIn: process.env.JWT_EXPIRES_IN || "8h",
   });
 
-  // 6️⃣ Retornar datos seguros al frontend
   return {
     usuario: {
       id: usuario.id,
@@ -63,6 +55,9 @@ export const login = async ({ email, password }) => {
     token,
   };
 };
+
+
+
 
 /**
  * 🔁 (Opcional) Refrescar token JWT

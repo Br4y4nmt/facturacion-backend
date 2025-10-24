@@ -2,6 +2,7 @@ import express from "express";
 import {
   login,
   refresh,
+  logout,
   checkSession,
 } from "./controller.js";
 import { authenticate } from "#middlewares/auth.js";
@@ -18,7 +19,7 @@ const loginLimiter = rateLimit({
   message: { error: "Demasiados intentos. Intenta más tarde." },
 });
 
-// Validaciones
+
 const validateLogin = [
   body("email").isEmail().withMessage("Email inválido"),
   body("password").notEmpty().withMessage("Contraseña requerida"),
@@ -26,6 +27,7 @@ const validateLogin = [
 
 
 router.post("/login", loginLimiter, validateLogin, audit, login);
+router.post("/logout", logout); 
 router.get("/me", authenticate, checkSession);
 router.post("/refresh", refresh);
 

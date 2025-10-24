@@ -1,8 +1,5 @@
 import jwt from "jsonwebtoken";
 
-/**
- * Middleware de autenticación usando cookies httpOnly
- */
 export const authenticate = (req, res, next) => {
   try {
     const token = req.cookies?.token;
@@ -12,7 +9,6 @@ export const authenticate = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ Guarda el usuario decodificado en la request (útil para las rutas)
     req.user = decoded;
 
     next();
