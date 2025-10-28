@@ -30,6 +30,7 @@ export const login = async ({ email, password }) => {
 
   const payload = {
     id: usuario.id,
+    nombre: usuario.nombre,
     email: usuario.email,
     rolId: usuario.rolId,
     empresaId: usuario.empresaId,
@@ -57,6 +58,10 @@ export const login = async ({ email, password }) => {
 };
 
 
+export const getProfile = async () => {
+  const res = await axios.get(`${API_URL}/me`, { withCredentials: true });
+  return res.data; // Esto devuelve { usuario: {...} }
+};
 
 
 /**
